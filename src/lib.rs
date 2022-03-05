@@ -94,7 +94,6 @@ mod tests {
 }
 
 pub struct SecretData {
-    pub secret_data: Option<String>,
     pub coefficients: Vec<Vec<u8>>,
 }
 
@@ -119,7 +118,6 @@ impl SecretData {
         }
 
         SecretData {
-            secret_data: Some(secret.to_string()),
             coefficients,
         }
     }
