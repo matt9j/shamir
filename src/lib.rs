@@ -105,10 +105,14 @@ pub enum ShamirError {
 
 impl SecretData {
     pub fn with_secret(secret: &str, threshold: u8) -> SecretData {
+        SecretData::with_secret_bytes(secret.as_bytes(), threshold)
+    }
+
+    pub fn with_secret_bytes(secret: &[u8], threshold: u8) -> SecretData {
         let mut coefficients: Vec<Vec<u8>> = vec![];
         let mut rng = thread_rng();
         let mut rand_container = vec![0u8; (threshold - 1) as usize];
-        for c in secret.as_bytes() {
+        for c in secret {
             rng.fill_bytes(&mut rand_container);
             let mut coef: Vec<u8> = vec![*c];
             for r in rand_container.iter() {
@@ -146,6 +150,23 @@ impl SecretData {
     }
 
     pub fn recover_secret(threshold: u8, shares: Vec<Vec<u8>>) -> Option<String> {
+        match SecretData::recover_secret_bytes(threshold, shares) {
+            Some(data) => {
+                match String::from_utf8(data) {
+                    Ok(s) => Some(s),
+                    Err(e) => {
+                        println!("{:?}", e);
+                        None
+                    }
+                }
+            }
+            None => {
+                None
+            }
+        }
+    }
+
+    pub fn recover_secret_bytes(threshold: u8, shares: Vec<Vec<u8>>) -> Option<Vec<u8>> {
         if threshold as usize > shares.len() {
             println!("Number of shares is below the threshold");
             return None;
@@ -184,13 +205,7 @@ impl SecretData {
             }
         }
 
-        match String::from_utf8(mysecretdata) {
-            Ok(s) => Some(s),
-            Err(e) => {
-                println!("{:?}", e);
-                None
-            }
-        }
+        return Some(mysecretdata)
     }
 
     fn accumulate_share_bytes(id: u8, coefficient_bytes: Vec<u8>) -> Result<u8, ShamirError> {
