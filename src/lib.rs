@@ -1,6 +1,6 @@
 extern crate rand;
 
-use rand::{thread_rng, RngCore};
+use rand::thread_rng;
 
 #[cfg(test)]
 mod tests {
@@ -105,12 +105,12 @@ pub enum ShamirError {
 
 impl SecretData {
     pub fn with_secret(secret: &str, threshold: u8) -> SecretData {
-        SecretData::with_secret_bytes(secret.as_bytes(), threshold)
+        let mut rng = thread_rng();
+        SecretData::with_secret_bytes(secret.as_bytes(), threshold, &mut rng)
     }
 
-    pub fn with_secret_bytes(secret: &[u8], threshold: u8) -> SecretData {
+    pub fn with_secret_bytes<T: rand::RngCore>(secret: &[u8], threshold: u8, rng: &mut T) -> SecretData {
         let mut coefficients: Vec<Vec<u8>> = vec![];
-        let mut rng = thread_rng();
         let mut rand_container = vec![0u8; (threshold - 1) as usize];
         for c in secret {
             rng.fill_bytes(&mut rand_container);
