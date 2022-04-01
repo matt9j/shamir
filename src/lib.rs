@@ -109,7 +109,11 @@ impl SecretData {
         SecretData::with_secret_bytes(secret.as_bytes(), threshold, &mut rng)
     }
 
-    pub fn with_secret_bytes<T: rand::RngCore>(secret: &[u8], threshold: u8, rng: &mut T) -> SecretData {
+    pub fn with_secret_bytes<T: rand::RngCore>(
+        secret: &[u8],
+        threshold: u8,
+        rng: &mut T,
+    ) -> SecretData {
         let mut coefficients: Vec<Vec<u8>> = vec![];
         let mut rand_container = vec![0u8; (threshold - 1) as usize];
         for c in secret {
@@ -121,9 +125,7 @@ impl SecretData {
             coefficients.push(coef);
         }
 
-        SecretData {
-            coefficients,
-        }
+        SecretData { coefficients }
     }
 
     pub fn get_share(&self, id: u8) -> Result<Vec<u8>, ShamirError> {
@@ -151,18 +153,14 @@ impl SecretData {
 
     pub fn recover_secret(threshold: u8, shares: Vec<Vec<u8>>) -> Option<String> {
         match SecretData::recover_secret_bytes(threshold, shares) {
-            Some(data) => {
-                match String::from_utf8(data) {
-                    Ok(s) => Some(s),
-                    Err(e) => {
-                        println!("{:?}", e);
-                        None
-                    }
+            Some(data) => match String::from_utf8(data) {
+                Ok(s) => Some(s),
+                Err(e) => {
+                    println!("{:?}", e);
+                    None
                 }
-            }
-            None => {
-                None
-            }
+            },
+            None => None,
         }
     }
 
