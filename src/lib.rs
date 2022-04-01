@@ -205,7 +205,7 @@ impl SecretData {
             }
         }
 
-        return Some(mysecretdata)
+        Some(mysecretdata)
     }
 
     fn accumulate_share_bytes(id: u8, coefficient_bytes: Vec<u8>) -> Result<u8, ShamirError> {
@@ -316,13 +316,18 @@ impl SecretData {
     fn add_polynomials(a: &[u8], b: &[u8]) -> Vec<u8> {
         let mut a = a.to_owned();
         let mut b = b.to_owned();
-        if a.len() < b.len() {
-            let mut t = vec![0; b.len() - a.len()];
-            a.append(&mut t);
-        } else if a.len() > b.len() {
-            let mut t = vec![0; a.len() - b.len()];
-            b.append(&mut t);
+        match a.len().cmp(&b.len()) {
+            std::cmp::Ordering::Less => {
+                let mut t = vec![0; b.len() - a.len()];
+                a.append(&mut t);
+            }
+            std::cmp::Ordering::Equal => {}
+            std::cmp::Ordering::Greater => {
+                let mut t = vec![0; a.len() - b.len()];
+                b.append(&mut t);
+            }
         }
+
         let mut results: Vec<u8> = vec![];
 
         for i in 0..a.len() {
